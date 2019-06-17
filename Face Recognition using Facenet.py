@@ -19,7 +19,8 @@ from keras.models import load_model
 
 # In[2]:
 
-
+# load pretrained facenet model.
+# This model transfer the image to a 128 vector, namely face embedding.
 model = load_model('facenet_keras.h5')
 
 
@@ -29,14 +30,10 @@ model = load_model('facenet_keras.h5')
 model.summary()
 
 
-# In[4]:
-
-
-model.count_params()
 
 
 # In[5]:
-
+# define triplet loss for one shot learning
 
 def triplet_loss(y, yhat, alpha = 0.2):
     anchor, positive, negative = yhat[0], yhat[1], yhat[2]
@@ -51,6 +48,8 @@ def triplet_loss(y, yhat, alpha = 0.2):
 
 
 model.compile(optimizer = 'adam', loss = triplet_loss, metrics = ['accuracy'])
+
+# load pre-trained weights
 model.load_weights('facenet_keras_weights.h5')
 
 
@@ -62,7 +61,8 @@ from PIL import Image
 from numpy import asarray
 from matplotlib import pyplot
 from mtcnn.mtcnn import MTCNN
-     
+
+# preprocess image and face embedding
 def preprocess_face(face, model):
     face = face.astype('float32')
     mean, std = face.mean(), face.std()
@@ -74,19 +74,14 @@ def preprocess_face(face, model):
     
 # extract a single face from a given photograph
 def extract_face(filename, required_size=(160, 160)):
-	# load image from file
 	image = Image.open(filename)
-	# convert to RGB, if needed
 	image = image.convert('RGB')
-	# convert to array
 	pixels = asarray(image)
-	# create the detector, using default weights
+	#using MTCNN to detect face in the image
 	detector = MTCNN()
-	# detect faces in the image
 	results = detector.detect_faces(pixels)
 	# extract the bounding box from the first face
 	x1, y1, width, height = results[0]['box']
-	# bug fix
 	x1, y1 = abs(x1), abs(y1)
 	x2, y2 = x1 + width, y1 + height
 	# extract the face
@@ -97,7 +92,7 @@ def extract_face(filename, required_size=(160, 160)):
 	face_array = asarray(image)
 	return face_array
 
-
+# load faces to form a directory of items you would like to recognize.
 def load_faces(directory, model):
     face_vec = {}
     for filename in listdir(directory):
@@ -109,27 +104,15 @@ def load_faces(directory, model):
             face_vec[name] = vec 
     return face_vec
 
+
 folder = 'image_people/'
 face_vec = load_faces(folder, model)
 
 print(face_vec)
 
-
-# In[16]:
-
-
-#i = 1
-#for key in face_vec.keys():
-#    pyplot.subplot(2, 7, i)
-#    pyplot.axis('off')
-#    pyplot.imshow(face_vec[key])
-#    i += 1
-#pyplot.show()
-
-
 # In[57]:
 
-
+# Recognize the face from the camera. Check whether it's the one in your directory.
 def whether_avengers(filename, face_vec, model):
     visitor_face = extract_face(filename, required_size=(160, 160))
     pyplot.imshow(visitor_face)
@@ -148,23 +131,15 @@ def whether_avengers(filename, face_vec, model):
     return min_dist, identity
 
 
-# In[58]:
-
-
-#vec = face_vec['ironman.jpg']
-#print(vec.shape)
-
 
 # In[70]:
 
 
 import numpy as np
-image_visitor = 'camera/cmv.jpg'
+
+# Stark asked us to build a face recognition system for the avengers.
+# If it's an avenger, the system will let her/him in, otherwise let them go.
+# Here we go! Avengers!
+
+image_visitor = 'camera/ironman.jpg'
 whether_avengers(image_visitor, face_vec, model)
-
-
-# In[ ]:
-
-
-
-
