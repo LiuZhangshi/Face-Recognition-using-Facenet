@@ -1,4 +1,4 @@
-# Face-Recognition-using-Facenet
+# One-Shot-Face-Recognition-using-Facenet
 This code using pretrained FaceNet model to build an application of face recognition. Please see references below for the download links of FaceNet and MTCNN.
 
 References:
